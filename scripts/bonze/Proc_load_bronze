@@ -1,0 +1,185 @@
+-- =============================================
+-- 4. BULK INSERT - CRM CUSTOMER
+-- =============================================
+
+
+USE DataWarehouse;
+
+create or alter procedure bronze.load_bronze as 
+begin 
+    DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME
+
+    begin try
+    set @batch_start_time=GETDATE()
+        print '========================================';
+        print 'LOADING BRONZE LAYER';
+        print '========================================';
+
+
+        print '------------------------------------------';
+        print 'Loading CRM tables';
+        print '------------------------------------------';
+
+
+   
+
+        -- =============================================
+        -- 1. CRM CUSTOMER INFORMATION - CUST_INFO
+        -- =============================================
+        set @start_time=GETDATE()
+        print '>> Truncating table:bronze.crm_cust_info';
+
+        TRUNCATE TABLE bronze.crm_cust_info;
+
+        print '>> Inserting date into:bronze.crm_cust_info';
+
+        BULK INSERT bronze.crm_cust_info
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_crm\cust_info.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        set @end_time=GETDATE()
+        print'>> LOAD DURATION:'+cast(DATEDIFF(second,@start_time,@end_time) as NVARCHAR)+'seconds'
+        print'>>----------------------------------------------------------------------------------'
+
+        -- =============================================
+        -- 2. CRM PRODUCT INFORMATION - PRD_INFO
+        -- =============================================
+        set @start_time=GETDATE()
+        print '>> Truncating table:bronze.crm_prd_info';
+
+        TRUNCATE TABLE bronze.crm_prd_info;
+
+        print '>> Inserting date into:bronze.crm_prd_info';
+
+        BULK INSERT bronze.crm_prd_info
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_crm\prd_info.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        set @end_time=GETDATE()
+        print'>> LOAD DURATION:'+cast(DATEDIFF(second,@start_time,@end_time) as NVARCHAR)+'seconds'
+        print'>>----------------------------------------------------------------------------------'
+
+        -- =============================================
+        -- 3. CRM SALES INFORMATION - SALES_DETAILS
+        -- =============================================
+        set @start_time=GETDATE()
+
+        print '>> Truncating table:bronze.crm_sales_info';
+
+        TRUNCATE TABLE bronze.crm_sales_info;
+
+        print '>> Inserting date into:bronze.crm_sales_info';
+
+        BULK INSERT bronze.crm_sales_info
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_crm\sales_details.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        set @end_time=GETDATE()
+        print'>>LOAD DURATION:' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds'
+        print'>>----------------------------------------------------------------------------------'
+
+    
+        print '------------------------------------------';
+        print 'Loading ERP tables';
+        print '------------------------------------------';
+
+        -- =============================================
+        -- 4. ERP CUSTOMER INFORMATION - CUST_AZ12
+        -- =============================================
+        set @start_time=GETDATE()
+        print '>> Truncating table:bronze.erp_cust_az12';
+
+        TRUNCATE TABLE bronze.erp_cust_az12;
+
+        print '>> Inserting date into:bronze.erp_cust_az12';
+
+        BULK INSERT bronze.erp_cust_az12
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_erp\CUST_AZ12.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        set @end_time=GETDATE()
+        print '>>LOAD DURATION:' +cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds'
+        print'>>----------------------------------------------------------------------------------'
+
+
+        -- =============================================
+        -- 5. ERP LOCATION INFORMATION - LOC_A101
+        -- =============================================
+        set @start_time=GETDATE()
+        PRINT '>> Truncating table: bronze.erp_loc_a101';
+    
+        TRUNCATE TABLE bronze.erp_loc_a101;
+
+        PRINT '>> Inserting data into: bronze.erp_loc_a101';
+
+        BULK INSERT bronze.erp_loc_a101
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_erp\LOC_A101.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        set @end_time=GETDATE()
+        print '>>LOAD DURATION:' + cast(Datediff(second,@start_time,@end_time) as nvarchar) +'seconds'
+        print'>>----------------------------------------------------------------------------------'
+
+        -- =============================================
+        -- 6. ERP PRODUCT CATEGORY - PX_CAT_G1V2
+        -- =============================================
+        set @start_time= GETDATE()
+
+        PRINT '>> Truncating table: bronze.erp_px_cat_g1v2';
+
+        TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+
+        PRINT '>> Inserting data into: bronze.erp_px_cat_g1v2';
+
+        BULK INSERT bronze.erp_px_cat_g1v2
+        FROM 'C:\Users\bindu\Downloads\sql-data-warehouse-project\sql-data-warehouse-project\01_datasets\source_erp\PX_CAT_G1V2.csv'
+        WITH
+        (
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+
+        PRINT '>> LOAD DURATION: ' +CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR(20)) + ' seconds';
+   
+      set @batch_end_time= GETDATE()
+      print'================================================================================='
+      print'LOADING BRONZE LAYER IS COMPLETED'
+      print 'TOTAL LOADING DURATION'+cast(datediff(second,@batch_start_time ,@batch_end_time) as nvarchar) +'seconds'
+      print'================================================================================='
+
+
+      END Try 
+      BEGIN CATCH
+      print'===============================';
+      PRINT 'ERROR OCCURRED DURING LOADING BRONZE LAYER';
+      PRINT 'Error Message: ' + ERROR_MESSAGE();
+      PRINT 'Error Number: ' + CAST(ERROR_NUMBER() AS NVARCHAR(20));
+      PRINT 'Error State: ' + CAST(ERROR_STATE() AS NVARCHAR(20));
+      print'===============================';
+
+    
+      END CATCH
+      
+END 
